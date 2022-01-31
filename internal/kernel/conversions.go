@@ -69,8 +69,13 @@ func (c *Client) castAndSetToPtr(ptr reflect.Value, data reflect.Value) {
 			return
 		}
 
+		targetType := ptr.Type()
+		if typ, ok := c.Types().FindType(ref.TypeFQN()); ok && typ.AssignableTo(ptr.Type()) {
+			targetType = typ
+		}
+
 		// If return data is jsii object references, add to objects table.
-		if err := c.Types().InitJsiiProxy(ptr); err == nil {
+		if err := c.Types().InitJsiiProxy(ptr, targetType); err == nil {
 			if err = c.RegisterInstance(ptr, ref.InstanceID); err != nil {
 				panic(err)
 			}
